@@ -1,0 +1,67 @@
+environment vars should be set to facilitate compilation of the organism body
+
+export LIBRARY_PATH=$LIBRARY_PATH:~/lib
+export CPATH=$CPATH:~/lib
+export DEFAULT_LIBRARIES="-lgenome -lnnets -lcommon"
+
+body is a neural network
+input genes to hidden to output genes
+
+genes should be written multiple times in the genome
+
+information about the world is put into shared memory by the process that spawn organisms
+man shmget
+
+genes can read this information and send signals / semaphore to the body
+
+genetic code is written twice in the organism
+to mate - copy pieces from each parent
+
+genes to build the NNET
+transcribe(gene_name)
+
+08/22/08
+increasingly complex behaviour from simple components
+I dance around the room when it receieves a message from a gene
+transcription and IPC are working
+
+
+organism is a series of genes
+a gene is:
+	code{NON_CODING,BODY,GENE} 
+	length of data
+	data
+
+libraries:
+
+/common
+	some macros defined, some random number generation utilities, fileIO, etc
+
+/genome
+	transcribeGene - get a gene string from an organism then compile_and_execute 
+	compile_and_execute - put a string in a tempfile, compile, fork, exec
+
+/nnets
+	neural networks
+
+/messages
+	utilities for UDP communication to simplify communication between genes and organism processes
+
+genes:
+
+add_auditory 
+	build a subnet from ear to mouth
+
+say
+	display text 
+
+
+the main program is the world - arbitration infrastructure - this isn't written yet 
+
+organisms go into an infinite loop
+genes and the world push data into the input neurons
+the output neurons transcribe genes and send signals to the world
+
+
+code in agent.cpp communicates with child, holds external state 
+all internal state should be controled by body&genome
