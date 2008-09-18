@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 	srandom(200);
 	if(argc<2) return 0;
 	Net myNet;
-	printf("add_reproduction started with file %s port %s\n", argv[0], argv[1]);
+	//printf("add_reproduction started with file %s port %s\n", argv[0], argv[1]);
 	char * genome_file = argv[0];
 	int port = atoi(argv[1]);
 

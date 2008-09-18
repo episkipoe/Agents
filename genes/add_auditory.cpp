@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 	srandom(100);
 	if(argc<2) return 0;
 	Net myNet;
-	printf("add_auditory started with file %s port %s\n", argv[0], argv[1]);
+	//printf("add_auditory started with file %s port %s\n", argv[0], argv[1]);
 	char * genome_file = argv[0];
 	int port = atoi(argv[1]);
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 		input_neurons[i] = myNet.addNeuron(INPUT, input_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(0.5,1.5);
+			float weight = randomFloat(-1.5,1.5);
 			myNet.addSynapse(input_neurons[i], hidden_neurons[h], weight);
 		}
 	}
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 		output_neurons[o] = myNet.addNeuron(OUTPUT, output_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(0.0,2.0);
+			float weight = randomFloat(-2.0,2.0);
 			myNet.addSynapse(hidden_neurons[h], output_neurons[o], weight);
 		}
 	}
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 		gene_neurons[o] = myNet.addNeuron(OUTPUT, gene_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(0.5,1.5);
+			float weight = randomFloat(-1.5,1.5);
 			myNet.addSynapse(hidden_neurons[h], gene_neurons[o], weight);
 		}
 	}

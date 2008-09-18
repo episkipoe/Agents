@@ -9,5 +9,7 @@ void draw_agents(void) ;
 void remove_dead_agents(void) ;
 void kill_all_agents(void) ;
 
+void transmit_senses(void) ;
+
 #endif
 

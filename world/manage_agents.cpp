@@ -1,8 +1,10 @@
 #include <vector>
 #include <genome/genome.h>
+#include <messages/message.h>
 #include "agent.h"
 
 extern vector <Agent *> agents;
+extern int myPort;
 int curPort=49153;
 
 Agent * add_agent(char * filename, Agent *mother) {
@@ -45,4 +47,18 @@ void kill_all_agents(void) {
 	agents.clear();
 }
 
+char * get_vision_vector(Point * eye, float heading, float angle, int * length) {
+	*length=0;
+	return (char*)0;
+}
+
+void transmit_senses(void) {
+	return ;
+	for (unsigned int i=0;i<agents.size();i++) {
+		int message_length;
+		char * data = get_vision_vector(agents[i]->getLocation(), agents[i]->attr.heading, agents[i]->attr.view_angle, &message_length);
+		send_message(myPort, agents[i]->get_port(), VISION, message_length, data);
+		delete [] data;
+	}
+}
 

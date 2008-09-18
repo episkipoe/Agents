@@ -60,6 +60,7 @@ int check_for_message(void) {
 				memcpy(&x, data, sizeof(char));
 				data+=sizeof(char);
 				memcpy(&y, data, sizeof(char));
+				printf("move x,y %i,%i\n", x, y);
 				sender->move(x, y);
 			}	
 			break;
@@ -88,6 +89,7 @@ void timer(int val) {
 	} 
 	try {
 		remove_dead_agents();
+		transmit_senses();
 		check_for_message();
 	}
 	catch (...) {

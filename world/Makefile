@@ -4,7 +4,7 @@ SRC=	main.cpp \
 	input.cpp \
 	manage_agents.cpp
 
-LIBS=	$(DEFAULT_LIBRARIES)  -lglut 
+LIBS=	$(DEFAULT_LIBRARIES) -lgraphics -lglut 
 
 include ~/.makedefs
 

@@ -12,6 +12,7 @@ struct Attributes {
 	int energy;
 	int age;
 	float max_speed;
+	float heading, view_angle;
 } ;
 
 struct Appearance {
@@ -27,6 +28,7 @@ public:
 	Attributes attr;
 	void setAppearance(char * data, int data_size);
 	void getAppearance(int &width, int &height, char **data);
+	Point * getLocation (void) { return &attr.location; } 
 
 	/*communication*/
 	int get_port(void) { return port; }
