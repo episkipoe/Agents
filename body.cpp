@@ -29,6 +29,8 @@ int check_for_message(int sock) {
 		if(sender!=myPort) { /*ignore sounds from myself*/
 			myNet.feedInput(data, message_length, "ear");
 		}
+	} else if(type == VISION) {
+		myNet.feedInput(data, message_length, "eye");
 	} else if(type == KILL) {
 		printf("killed by message\n");
 		exit(0);
@@ -58,15 +60,14 @@ int main (int argc, char * argv[]) {
 
 	myGenome.transcribeGene("//add_auditory", 2, genome_file, portstr.str().c_str());
 	myGenome.transcribeGene("//add_reproduction", 2, genome_file, portstr.str().c_str());
+	myGenome.transcribeGene("//add_movement", 2, genome_file, portstr.str().c_str());
 	myNet.loadFromFile(net_file.str().c_str());
 	myNet.printStats();
 
 	printf("body\n");
-	myGenome.transcribeGene("//say", 2, portstr.str().c_str(), "test");
 
 	stringstream child_file;  child_file<<genome_file<<n_children;
 	//myGenome.transcribeGene("//asexual_reproduction", 4, portstr.str().c_str(), genome_file, child_file.str().c_str(), worldportstr.str().c_str());
-	
 	
 	int n=4;
 	while(1) {
@@ -78,14 +79,12 @@ int main (int argc, char * argv[]) {
 			map<string,int>output_length; map<string,unsigned char*>output_data;
 			myNet.fireNet(output_length, output_data);
 
-			//myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "talk", 0.5, "//say", 1, portstr.str().c_str()) ;
+			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "talk", 0.5, "//say", 1, portstr.str().c_str()) ;
+
+			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "legs", 0.5, "//move", 1, portstr.str().c_str()) ;
 
 			stringstream child_file;  child_file<<genome_file<<n_children;
 			//myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "reproduction", 0.5, "//asexual_reproduction", 4, portstr.str().c_str(), genome_file, child_file.str().c_str(), worldportstr.str().c_str()) ;
-	
-			myGenome.transcribeGene("//move", 3, portstr.str().c_str(), 'a', 'b');
-			printf("move\n");
-			if(n--<=0) break;
 	
 			usleep(2000);
 			sleep(2);
