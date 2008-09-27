@@ -3,7 +3,7 @@
 #include "agent.h"
 
 Agent * add_agent(char * filename, Agent * mother=(Agent*)0) ;
-Agent * get_agent(int port) ;
+Agent * get_agent_by_port(int port) ;
 
 void draw_agents(void) ;
 void remove_dead_agents(void) ;

@@ -12,7 +12,7 @@ struct Attributes {
 	int energy;
 	int age;
 	float max_speed;
-	float heading, view_angle;
+	float heading, view_angle, view_distance;
 } ;
 
 struct Appearance {

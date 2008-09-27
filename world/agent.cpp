@@ -9,6 +9,9 @@ Agent::Agent(Genome * g, int mypid, int myport):genome(g), pid(mypid), port(mypo
 	attr.max_speed=3.0;
 	attr.location.x=numberBetween(-10,10);
 	attr.location.y=numberBetween(-10,10);
+	attr.heading=0.0;
+	attr.view_angle=PI/4.0;
+	attr.view_distance=80;
 	memset(&avatar, 0, sizeof(Appearance));
 }
 

@@ -20,7 +20,7 @@ int check_for_message(void) {
 	if(type==NO_MESSAGE) return 0;
 	printf("world recvd %i from port %i\n", type, sender_port);
 
-	Agent * sender = get_agent(sender_port);
+	Agent * sender = get_agent_by_port(sender_port);
 	switch(type) {
 		/* broadcast to all agents */
 		case SOUND: 
@@ -43,7 +43,7 @@ int check_for_message(void) {
 				if(victim==myPort) {
 					kill_all_agents();
 				} else {
-					Agent * target = get_agent(victim);
+					Agent * target = get_agent_by_port(victim);
 					if(sender && target) {
 						sender->attack(target);
 					}	
@@ -109,7 +109,9 @@ int main (int argc, char * argv[]) {
 	sigaction(SIGTERM, &new_action, NULL);
 
 	for(int gidx = 1 ; gidx<argc ; gidx++) {
-		add_agent(argv[gidx]);
+		for(int i=0;i<10;i++) {
+			add_agent(argv[gidx]);
+		}
 	}
 
 	/*go to glut*/
