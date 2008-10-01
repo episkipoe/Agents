@@ -9,7 +9,7 @@ Agent::Agent(Genome * g, int mypid, int myport):genome(g), pid(mypid), port(mypo
 	attr.max_speed=3.0;
 	attr.location.x=numberBetween(-10,10);
 	attr.location.y=numberBetween(-10,10);
-	attr.heading=0.0;
+	attr.heading=numberBetween(-PI*0.5,PI*0.5);
 	attr.view_angle=PI/4.0;
 	attr.view_distance=80;
 	memset(&avatar, 0, sizeof(Appearance));
@@ -27,7 +27,7 @@ void Agent::setAppearance(char * data, int data_size) {
 	memcpy(&height, data, sizeof(int));
 	data+=sizeof(int);  data_size-=sizeof(int);
 	int size = width*height;
-	printf("recover image %i by %i  (%i vs %i)\n", width, height, size, data_size);
+	//printf("recover image %i by %i  (%i vs %i)\n", width, height, size, data_size);
 	if(data_size<size) return ;
 
 	delete [] avatar.data;
@@ -85,7 +85,18 @@ void Agent::move (int x, int y) {
 	}
 	attr.location.x += attr.max_speed*(x/double(SCHAR_MAX));
 	attr.location.y += attr.max_speed*(y/double(SCHAR_MAX));
-	printf("move by %i, %i  (%g)\n", x, y, (attr.max_speed*(x/double(SCHAR_MAX))));
+	//printf("move by %i, %i  (%g)\n", x, y, (attr.max_speed*(x/double(SCHAR_MAX))));
+}
+
+void Agent::turn (int angle) {
+	if(attr.energy<=2) {
+		if(!success(50)) {
+			sleep();
+		}
+		return;
+	}
+	float delta = 2*PI;	
+	attr.heading += -PI + (angle/double(SCHAR_MAX))*delta;
 }
 
 void Agent::endTurn(void) {

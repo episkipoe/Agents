@@ -3,6 +3,8 @@
 #include "display.h"
 #include "manage_agents.h"
 
+extern bool is_paused;
+
 namespace input {
 
 	bool left, right, up, down, in, out;  //motion keys
@@ -60,9 +62,12 @@ namespace input {
 	}
 
 	void keyboard (unsigned char key, int x, int y) {
-		if(key=='q') {
-			kill_all_agents();
-			exit(0);
+		switch(key) {
+			case 'p': is_paused = !is_paused;
+				break;
+			case 'q':
+				kill_all_agents();
+				exit(0);
 		}
 	}
 

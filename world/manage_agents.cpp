@@ -59,53 +59,76 @@ int get_agents_by_distance(Point * eye, float distance, vector<Agent*> &out_vec)
 }
 
 char * get_vision_vector(Agent * curAgent, int * length) {
-	*length=0;
-	return (char*)0;
-
 	Point * eye = curAgent->getLocation();
-	printf("get vision of %i\n\t", curAgent->get_port());
-	eye->show();
 
 	float slopeToView=tan(curAgent->attr.heading); /*rise over run on unit circle*/
+
+	/*
+	printf("get vision of %i\n\t", curAgent->get_port());
+	eye->show();
+	printf("looking at %g slope %g\n", curAgent->attr.heading, slopeToView);
+	*/
+
 	vector<Agent*> nearby;
 	get_agents_by_distance(eye, curAgent->attr.view_distance, nearby);
-	printf("%i agents in range\n", nearby.size());
+
+	if(nearby.size()<=0) {
+		*length=0;
+		return (char*)0;
+	}
+
 	vector <Agent *>::iterator iter;
 	for(iter = nearby.begin() ; iter!=nearby.end() ; iter++) {
 		Point * target = (*iter)->getLocation();
 		if((*iter)->get_port() == curAgent->get_port()) {
-			nearby.erase(iter);
+			iter = nearby.erase(iter);
+			if(iter==nearby.end()) break;
+			continue;
 		}
 
+		double slopeToTarget = (target->y - eye->y) / (target->x - eye->x);
+		double tanAngle = ((slopeToView-slopeToTarget)/(1 + slopeToView*slopeToTarget));
+		/*
 		printf("compare to %i\n\t", (*iter)->get_port());
 		target->show();
-
-		double slopeToTarget = (target->y - eye->y) / (target->x - eye->x);
-		printf("slope is %g\n", slopeToTarget);
-		double tanAngle = ((slopeToView-slopeToTarget)/(1 + slopeToView*slopeToTarget));
-		printf("tanAngle is %g\n", tanAngle);
+		printf("slope is %g\ntanAngle is %g\n", slopeToTarget, tanAngle);
+		*/
 		float angleToTarget;
 		if(!isfinite(tanAngle)) {
 			angleToTarget=PI*0.5;			
 		} else {
 			angleToTarget=atan(tanAngle);
 		}
-		printf("angle is %g\n", angleToTarget);
+		//printf("angle is %g\n", angleToTarget);
 		float angle = curAgent->attr.view_angle;
-		if(fabs(angleToTarget) < (angle*0.5)) {
-			printf("erase iter %p\n", iter);
-			nearby.erase(iter);
-		}
+		if(fabs(angleToTarget) > (angle*0.5)) {
+			iter = nearby.erase(iter);
+			if(iter==nearby.end()) break;
+			continue;
+		} 
 	}
-	printf("%i agents in angle\n", nearby.size());
+	//printf("%i agents visible\n", nearby.size());
 
-	//int size = nearby.size()*sizeof(int);
+	int size = nearby.size()*sizeof(int);
+	*length=size;
+	if(size<=0) { 
+		return (char*)0;
+	}
+	char * data = new char[size];
+	char * loadingZone = data;
+	for(unsigned int i=0;i<nearby.size();i++) {
+		int port = nearby[i]->get_port();
+		memcpy(loadingZone, &port, sizeof(int));
+		loadingZone+=sizeof(int);
+	}
+	return data;
 }
 
 void transmit_senses(void) {
 	for (unsigned int i=0;i<agents.size();i++) {
 		int message_length;
 		char * data = get_vision_vector(agents[i], &message_length);
+		if(message_length <= 0) continue ;
 		send_message(myPort, agents[i]->get_port(), VISION, message_length, data);
 		delete [] data;
 	}

@@ -57,7 +57,9 @@ void display(void) {
 		glBindTexture(GL_TEXTURE_2D, id);
 		Point * curPos = &agents[i]->attr.location;
 		glPushMatrix();
+		float angle = agents[i]->attr.heading*180.0/PI;
 		glTranslatef(curPos->x, curPos->y, curPos->z);
+		glRotatef(angle, 0, 0, 1);
 		glBegin (GL_QUADS);
 			glTexCoord2f (0.0f,0.0f); /* lower left corner */
 			glVertex3f (left, bottom, 0.0f);
@@ -90,6 +92,8 @@ void reshape(int w, int h) {
    	glMatrixMode(GL_PROJECTION) ;
    	glLoadIdentity();
 	gluPerspective(45, w / h, 0.2, 1000);
+  	glMatrixMode(GL_MODELVIEW);
+	glViewport(0,0,w,h);
 	set_eye();
 }
 
@@ -132,14 +136,14 @@ void move_eye(bool left, bool right, bool up, bool down, bool in, bool out) {
 		look.y -= delta;
 	}
 	if(in) {
-		eye.z -= speed;
+		eye.z -= delta;
 		if(eye.z<0) eye.z = 0;
-		look.z -= speed;
+		look.z -= delta;
 		if(look.z<0) look.z = 0;
 	}
 	if(out) {
-		eye.z += speed;
-		look.z += speed;
+		eye.z += delta;
+		look.z += delta;
 	}
 	int any=left+right+up+down+in+out;
 	if(!any) return ;

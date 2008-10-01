@@ -6,70 +6,12 @@
 #include "manage_agents.h"
 #include "display.h"
 #include "input.h"
+#include "message_dispatch.h"
 
 int myPort=49152;
 int sock; 
 vector <Agent *> agents;
-
-int check_for_message(void) {
-	static char * data=0;
-	int message_length, sender_port;
-	if(!data) data = new char[MAXMSGSIZE+1];
-	MessageType type = get_message(sock, &data, message_length, &sender_port);
-
-	if(type==NO_MESSAGE) return 0;
-	printf("world recvd %i from port %i\n", type, sender_port);
-
-	Agent * sender = get_agent_by_port(sender_port);
-	switch(type) {
-		/* broadcast to all agents */
-		case SOUND: 
-			for (unsigned int i=0;i<agents.size();i++) {
-				send_message(sender_port, agents[i]->get_port(), type, message_length, data);
-			}
-			break;
-		case NEW_ORGANISM:
-			{
-				char * filename = getStringFromData(data, message_length);
-				if(sender) sender->haveChild(filename);
-				delete [] filename;
-				send_message(myPort, sender_port, type, 0, (char*)0);
-			}
-			break;
-		case KILL:
-			{
-				int victim;
-				memcpy(&victim, data, sizeof(int));
-				if(victim==myPort) {
-					kill_all_agents();
-				} else {
-					Agent * target = get_agent_by_port(victim);
-					if(sender && target) {
-						sender->attack(target);
-					}	
-				}
-			}
-			break;
-		case VISION:
-			printf("%i receieved VISION\n", sender_port);
-			if(sender) sender->setAppearance(data, message_length);
-			break;
-		case MOVE:
-			{
-				char x, y;
-				memcpy(&x, data, sizeof(char));
-				data+=sizeof(char);
-				memcpy(&y, data, sizeof(char));
-				printf("move x,y %i,%i\n", x, y);
-				sender->move(x, y);
-			}	
-			break;
-		default:
-			break;
-	}
-
-	return 1;
-}
+bool is_paused=false;
 
 void handle_signal (int signum) {
 	if(signum == SIGTERM) {
@@ -82,11 +24,13 @@ void handle_signal (int signum) {
 #define DISPLAY_TIMER 1
 void timer(int val) {
 	if(val==DISPLAY_TIMER) {
+		glutTimerFunc(100,  timer, val);  
 		input::timer();
 		glutPostRedisplay();
-		glutTimerFunc(10,  timer, val);  
 		return;
 	} 
+	glutTimerFunc(200,  timer, val);  
+	if(is_paused) return;
 	try {
 		remove_dead_agents();
 		transmit_senses();
@@ -95,7 +39,6 @@ void timer(int val) {
 	catch (...) {
 		printf("world error in timer\n");
 	}
-	glutTimerFunc(5,  timer, val);  
 }
 
 int main (int argc, char * argv[]) {
@@ -109,7 +52,7 @@ int main (int argc, char * argv[]) {
 	sigaction(SIGTERM, &new_action, NULL);
 
 	for(int gidx = 1 ; gidx<argc ; gidx++) {
-		for(int i=0;i<10;i++) {
+		for(int i=0;i<2;i++) {
 			add_agent(argv[gidx]);
 		}
 	}
@@ -117,8 +60,8 @@ int main (int argc, char * argv[]) {
 	/*go to glut*/
 	glutInit(&argc,argv);
 	initialize_display();
-	glutTimerFunc(5,  timer, MSG_TIMER);  
-	glutTimerFunc(10, timer, DISPLAY_TIMER);  
+	glutTimerFunc(200,  timer, MSG_TIMER);  
+	glutTimerFunc(100, timer, DISPLAY_TIMER);  
 	glutMainLoop();
 
 	close (sock);

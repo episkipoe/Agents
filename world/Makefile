@@ -2,7 +2,8 @@ SRC=	main.cpp \
 	agent.cpp \
 	display.cpp \
 	input.cpp \
-	manage_agents.cpp
+	manage_agents.cpp \
+	message_dispatch.cpp
 
 LIBS=	$(DEFAULT_LIBRARIES) -lgraphics -lglut 
 

@@ -39,6 +39,7 @@ public:
 	int haveChild(char * filename);
 	void attack (Agent * target) ;
 	void move (int x, int y) ;
+	void turn (int angle) ;
 
 	/*time*/
 	void endTurn(void) ;
