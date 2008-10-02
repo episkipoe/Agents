@@ -59,7 +59,7 @@ int get_agents_by_distance(Point * eye, float distance, vector<Agent*> &out_vec)
 }
 
 char * get_vision_vector(Agent * curAgent, int * length) {
-	Point * eye = curAgent->getLocation();
+	Point * eye = curAgent->get_location();
 
 	float slopeToView=tan(curAgent->attr.heading); /*rise over run on unit circle*/
 
@@ -79,7 +79,7 @@ char * get_vision_vector(Agent * curAgent, int * length) {
 
 	vector <Agent *>::iterator iter;
 	for(iter = nearby.begin() ; iter!=nearby.end() ; iter++) {
-		Point * target = (*iter)->getLocation();
+		Point * target = (*iter)->get_location();
 		if((*iter)->get_port() == curAgent->get_port()) {
 			iter = nearby.erase(iter);
 			if(iter==nearby.end()) break;
@@ -128,7 +128,6 @@ void transmit_senses(void) {
 	for (unsigned int i=0;i<agents.size();i++) {
 		int message_length;
 		char * data = get_vision_vector(agents[i], &message_length);
-		if(message_length <= 0) continue ;
 		send_message(myPort, agents[i]->get_port(), VISION, message_length, data);
 		delete [] data;
 	}

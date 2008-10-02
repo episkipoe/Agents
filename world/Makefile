@@ -2,6 +2,7 @@ SRC=	main.cpp \
 	agent.cpp \
 	display.cpp \
 	input.cpp \
+	announcements.cpp \
 	manage_agents.cpp \
 	message_dispatch.cpp
 

@@ -1,7 +1,10 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <common/randomhelp.h>
+#include <graphics/graphics.h>
 #include "manage_agents.h"
+
+extern float text_size;
 
 Agent::Agent(Genome * g, int mypid, int myport):genome(g), pid(mypid), port(myport) {
 	attr.energy=10;
@@ -20,7 +23,7 @@ Agent::~Agent() {
 	delete genome;
 }
 
-void Agent::setAppearance(char * data, int data_size) {
+void Agent::set_appearance(char * data, int data_size) {
 	int width, height; 
 	memcpy(&width, data, sizeof(int));
 	data+=sizeof(int);  data_size-=sizeof(int);
@@ -37,10 +40,65 @@ void Agent::setAppearance(char * data, int data_size) {
 	memcpy((void*)avatar.data, data, size); 
 }
 
-void Agent::getAppearance(int &width, int &height, char **data) {
+void Agent::get_appearance(int &width, int &height, char **data) {
 	width = avatar.width;
 	height = avatar.height;
 	*data = avatar.data;
+}
+
+void Agent::draw(void) {
+	int id = get_port();
+	int width=avatar.width, height=avatar.height;
+	float x_delta=width*0.1; 
+	float y_delta=height*0.1; 
+	char * data = avatar.data;
+	Point * curPos = &attr.location;
+
+	if(!glIsTexture(id)) {
+		int size = width*height;
+		if(size<=0) {
+			glColor3f(1.0,1.0,1.0);
+			stringstream lbl;  lbl<<id;
+			drawText(curPos->x-x_delta, curPos->y+y_delta, lbl.str().c_str(), text_size);
+			return ;
+		}
+		glBindTexture(GL_TEXTURE_2D, id);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_BYTE, data);
+	} 
+	float left   = -x_delta;
+	float right  =  x_delta;
+	float bottom = -y_delta;
+	float top    =  y_delta;
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, id);
+	glPushMatrix();
+	float angle = attr.heading*180.0/PI;
+	glTranslatef(curPos->x, curPos->y, curPos->z);
+	glRotatef(angle, 0, 0, 1);
+	glBegin (GL_QUADS);
+		glTexCoord2f (0.0f,0.0f); /* lower left corner */
+		glVertex3f (left, bottom, 0.0f);
+		glTexCoord2f (1.0f, 0.0f); /* lower right corner */
+		glVertex3f (right, bottom, 0.0f);
+		glTexCoord2f (1.0f, 1.0f); /* upper right corner */
+		glVertex3f (right, top, 0.0f);
+		glTexCoord2f (0.0f, 1.0f); /* upper left corner */
+		glVertex3f (left, top, 0.0f);
+	glEnd ();	
+	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
+	glColor3f(1.0,1.0,1.0);
+	stringstream lbl;  lbl<<id;
+	drawText(curPos->x-x_delta, curPos->y+y_delta, lbl.str().c_str(), text_size);
+
 }
 
 int Agent::kill(int politely) {
@@ -60,7 +118,7 @@ int Agent::wake(void) {
 	return ::kill(pid, SIGCONT);
 }
 
-int Agent::haveChild(char * filename) {
+int Agent::have_child(char * filename) {
 	if(attr.energy<=2) return 0;
 	attr.energy*=0.5;
 	printf("child %s gets %i\n", filename, attr.energy);
@@ -99,7 +157,7 @@ void Agent::turn (int angle) {
 	attr.heading += -PI + (angle/double(SCHAR_MAX))*delta;
 }
 
-void Agent::endTurn(void) {
+void Agent::end_turn(void) {
 	attr.age++;
 	switch(attr.status) {
 		case OK: 

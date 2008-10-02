@@ -1,9 +1,9 @@
-#include <GL/glut.h>
 #include <vector>
 #include <common/point.h>
 #include <graphics/graphics.h>
 #include "input.h"
 #include "manage_agents.h"
+#include "announcements.h"
 
 Point eye;
 Point look;
@@ -19,63 +19,9 @@ void display(void) {
 	glEnd();
 
 	for (unsigned int i=0;i<agents.size();i++) {
-		int id = agents[i]->get_port();
-		/*
-			int width, height;
-			char * data;
-			agents[i]->getAppearance(width, height, &data);
-			int size = width*height;
-			if(size<=0) continue;
-			glRasterPos3f(curPos->x, curPos->y, curPos->z);
-			glDrawPixels(width, height, GL_RGBA, GL_BYTE, data);
-		*/
-
-		int width, height;
-		char * data;
-		agents[i]->getAppearance(width, height, &data);
-
-		if(!glIsTexture(id)) {
-			int size = width*height;
-			if(size<=0) continue;
-			glBindTexture(GL_TEXTURE_2D, id);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_BYTE, data);
-		} 
-		float x_delta=width*0.1; 
-		float y_delta=height*0.1; 
-		float left   = -x_delta;
-		float right  =  x_delta;
-		float bottom = -y_delta;
-		float top    =  y_delta;
-
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, id);
-		Point * curPos = &agents[i]->attr.location;
-		glPushMatrix();
-		float angle = agents[i]->attr.heading*180.0/PI;
-		glTranslatef(curPos->x, curPos->y, curPos->z);
-		glRotatef(angle, 0, 0, 1);
-		glBegin (GL_QUADS);
-			glTexCoord2f (0.0f,0.0f); /* lower left corner */
-			glVertex3f (left, bottom, 0.0f);
-			glTexCoord2f (1.0f, 0.0f); /* lower right corner */
-			glVertex3f (right, bottom, 0.0f);
-			glTexCoord2f (1.0f, 1.0f); /* upper right corner */
-			glVertex3f (right, top, 0.0f);
-			glTexCoord2f (0.0f, 1.0f); /* upper left corner */
-			glVertex3f (left, top, 0.0f);
-		glEnd ();	
-		glPopMatrix();
-		glDisable(GL_TEXTURE_2D);
-		glColor3f(1.0,1.0,1.0);
-		stringstream lbl;  lbl<<id;
-		drawText(curPos->x-x_delta, curPos->y+y_delta, lbl.str().c_str(), text_size);
+		agents[i]->draw();
 	}
+	draw_announcements();
 
   	glutSwapBuffers();
 }

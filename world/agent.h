@@ -26,9 +26,10 @@ public:
 	~Agent();
 
 	Attributes attr;
-	void setAppearance(char * data, int data_size);
-	void getAppearance(int &width, int &height, char **data);
-	Point * getLocation (void) { return &attr.location; } 
+	void set_appearance(char * data, int data_size);
+	void get_appearance(int &width, int &height, char **data);
+	Point * get_location (void) { return &attr.location; } 
+	void draw(void);
 
 	/*communication*/
 	int get_port(void) { return port; }
@@ -36,13 +37,13 @@ public:
 	int sleep(void);
 	int wake(void);
 
-	int haveChild(char * filename);
+	int have_child(char * filename);
 	void attack (Agent * target) ;
 	void move (int x, int y) ;
 	void turn (int angle) ;
 
 	/*time*/
-	void endTurn(void) ;
+	void end_turn(void) ;
 
 private:
 	Genome * genome;

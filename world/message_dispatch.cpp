@@ -3,6 +3,7 @@
 #include "agent.h"
 #include "manage_agents.h"
 #include "display.h"
+#include "announcements.h"
 
 extern int myPort;
 extern int sock; 
@@ -10,10 +11,10 @@ extern vector <Agent *> agents;
 
 int check_for_message(void) {
 	static char * data=0;
+	char data_copy[MAXMSGSIZE+1];
 	int message_length, sender_port;
 	if(!data) data = new char[MAXMSGSIZE+1];
 	MessageType type = get_message(sock, &data, message_length, &sender_port);
-
 	if(type==NO_MESSAGE) return 0;
 	//printf("world recvd %i from port %i\n", type, sender_port);
 
@@ -21,6 +22,17 @@ int check_for_message(void) {
 	switch(type) {
 		/* broadcast to all agents */
 		case SOUND: 
+			if(sender) {
+				for(int i=0 ; i < message_length ; i++) {
+					if(isprint(data[i])) {
+						data_copy[i]=data[i];
+					} else {
+						data_copy[i]='.';
+					}
+				}
+				data_copy[message_length]=0;
+				add_announcement(data_copy, sender->get_location(), 20);
+			}	
 			for (unsigned int i=0;i<agents.size();i++) {
 				send_message(sender_port, agents[i]->get_port(), type, message_length, data);
 			}
@@ -28,7 +40,7 @@ int check_for_message(void) {
 		case NEW_ORGANISM:
 			{
 				char * filename = getStringFromData(data, message_length);
-				if(sender) sender->haveChild(filename);
+				if(sender) sender->have_child(filename);
 				delete [] filename;
 				send_message(myPort, sender_port, type, 0, (char*)0);
 			}
@@ -48,7 +60,7 @@ int check_for_message(void) {
 			}
 			break;
 		case VISION:
-			if(sender) sender->setAppearance(data, message_length);
+			if(sender) sender->set_appearance(data, message_length);
 			break;
 		case MOVE:
 			{
