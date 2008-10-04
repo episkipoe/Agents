@@ -15,6 +15,7 @@ int worldPort=49152;
 int n_children=0;
 int organism_of_focus=worldPort;
 stringstream portstr; 
+char * genome_file;
 
 int check_for_message(int sock) {
 	static char * data=0;
@@ -29,21 +30,31 @@ int check_for_message(int sock) {
 		delete [] msg;
 		if(sender!=myPort) { /*ignore sounds from myself*/
 			myNet.feedInput(data, message_length, "ear");
+			usleep(200);
+			myNet.addClick();
+			usleep(200);
+			myGenome.transcribeGene("//encourage_auditory", 2, genome_file, portstr.str().c_str());
 		}
 	} else if(type == VISION) {
 		if(message_length<=0) {
 			organism_of_focus=worldPort;
-			char angle=100;
+			char angle=60;
 			myGenome.transcribeGene("//turn", 2, portstr.str().c_str(), &angle);
 		} else {
 			memcpy(&organism_of_focus, data, sizeof(int));
 			myNet.feedInput(data, message_length, "eye");
+			char * dx_str = &data[sizeof(int)];
+			float dx;
+			memcpy(&dx, dx_str, sizeof(float));
+			//printf("%i focus on %i dx %g\n", myPort, organism_of_focus, dx);
 		}
 	} else if(type == KILL) {
 		printf("killed by message\n");
 		exit(0);
 	} else if(type == NEW_ORGANISM) {
 		n_children++;
+	} else if(type == DISPLAY) {
+		myNet.printStats(1);
 	}
 	return 1;
 }
@@ -51,7 +62,7 @@ int check_for_message(int sock) {
 int main (int argc, char * argv[]) {
 	stringstream worldportstr; worldportstr << worldPort;
 	if(argc<2) return 1;
-	char * genome_file = argv[1];  if(!genome_file) return 1;
+	genome_file = argv[1];  if(!genome_file) return 1;
 	myGenome.attachFile(genome_file);
 	if(argc>2) myPort=atoi(argv[2]); 
 	portstr << myPort;
@@ -64,11 +75,11 @@ int main (int argc, char * argv[]) {
 	stringstream net_file;  net_file<<genome_file<<"."<<myPort<<".net";
 	myNet.name = net_file.str();
 	myNet.saveToFile(net_file.str().c_str());
-	myNet.printStats();
 	myGenome.transcribeGene("//add_auditory", 2, genome_file, portstr.str().c_str());
 	myGenome.transcribeGene("//add_reproduction", 2, genome_file, portstr.str().c_str());
 	myGenome.transcribeGene("//add_movement", 2, genome_file, portstr.str().c_str());
 	myGenome.transcribeGene("//add_turn", 2, genome_file, portstr.str().c_str());
+	myGenome.transcribeGene("//connect_subnets", 2, genome_file, portstr.str().c_str());
 	myNet.loadFromFile(net_file.str().c_str());
 	myNet.printStats();
 
@@ -84,17 +95,19 @@ int main (int argc, char * argv[]) {
 				nMessages = check_for_message(sock);
 			} while (nMessages>0);
 
+			myNet.addClick();
+
 			map<string,int>output_length; map<string,unsigned char*>output_data;
-			myNet.fireNet(output_length, output_data);
+			myNet.getOutput(output_length, output_data);
 
-			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "talk", 0.5, "//say", 1, portstr.str().c_str()) ;
+			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "talk", 0.25, "//say", 1, portstr.str().c_str()) ;
 
-			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "legs", 0.5, "//move", 1, portstr.str().c_str()) ;
+			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "move", 0.2, "//move", 1, portstr.str().c_str()) ;
 
-			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "legs", 0.5, "//turn", 1, portstr.str().c_str()) ;
+			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "turn", 0.1, "//turn", 1, portstr.str().c_str()) ;
 
 			stringstream child_file;  child_file<<genome_file<<n_children;
-			//myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "reproduction", 0.5, "//asexual_reproduction", 4, portstr.str().c_str(), genome_file, child_file.str().c_str(), worldportstr.str().c_str()) ;
+			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "reproduction", 0.5, "//asexual_reproduction", 4, portstr.str().c_str(), genome_file, child_file.str().c_str(), worldportstr.str().c_str()) ;
 	
 			usleep(2000);
 			sleep(2);
