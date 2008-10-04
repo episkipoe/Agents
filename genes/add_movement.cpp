@@ -15,9 +15,9 @@ int main(int argc, char *argv[]) {
 
 	int num_inputs = 10;
 	Neuron ** input_neurons = new Neuron*[num_inputs];
-	int num_hidden = 4;
+	int num_hidden = 5;
 	Neuron ** hidden_neurons = new Neuron*[num_hidden];
-	int num_outputs = 6;
+	int num_outputs = 3;
 	Neuron ** output_neurons = new Neuron*[num_outputs];
 	int num_geneneurons = 2;
 	Neuron ** gene_neurons = new Neuron*[num_geneneurons];
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 
 	char input_name[] = "eye";
 	char hidden_name[] = "visual";
-	char output_name[] = "legs";
+	char output_name[] = "move";
 	char gene_name[] = "//move";
 	stringstream net_file;  net_file<<genome_file<<"."<<port<<".net";
 	myNet.loadFromFile(net_file.str().c_str());
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 		input_neurons[i] = myNet.addNeuron(INPUT, input_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(-0.5,1.0);
+			float weight = randomFloat(-0.3,1.1);
 			myNet.addSynapse(input_neurons[i], hidden_neurons[h], weight);
 		}
 	}
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 		output_neurons[o] = myNet.addNeuron(OUTPUT, output_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(-0.5,1.1);
+			float weight = randomFloat(-0.3,1.5);
 			myNet.addSynapse(hidden_neurons[h], output_neurons[o], weight);
 		}
 	}
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 		gene_neurons[o] = myNet.addNeuron(OUTPUT, gene_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(-0.5,1.0);
+			float weight = randomFloat(-0.25,1.2);
 			myNet.addSynapse(hidden_neurons[h], gene_neurons[o], weight);
 		}
 	}

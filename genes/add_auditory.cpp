@@ -2,7 +2,6 @@
 #include <string>
 #include <stdio.h>
 #include <sstream>
-#include <common/shmem.h>
 #include <common/randomhelp.h>
 #include <nnets/nnets.h>
 int main(int argc, char *argv[]) {
@@ -12,23 +11,22 @@ int main(int argc, char *argv[]) {
 	//printf("add_auditory started with file %s port %s\n", argv[0], argv[1]);
 	char * genome_file = argv[0];
 	int port = atoi(argv[1]);
+	stringstream net_file;  net_file<<genome_file<<"."<<port<<".net";
+	myNet.loadFromFile(net_file.str().c_str());
 
-	int num_inputs = 4;
+	int num_inputs = 6;
 	Neuron ** input_neurons = new Neuron*[num_inputs];
-	int num_hidden = 4;
+	int num_hidden = 8;
 	Neuron ** hidden_neurons = new Neuron*[num_hidden];
-	int num_outputs = 2;
+	int num_outputs = 3;
 	Neuron ** output_neurons = new Neuron*[num_outputs];
-	int num_geneneurons = 4;
+	int num_geneneurons = 10;
 	Neuron ** gene_neurons = new Neuron*[num_geneneurons];
-
 
 	char input_name[] = "ear";
 	char hidden_name[] = "hearing";
 	char output_name[] = "talk";
 	char gene_name[] = "//say";
-	stringstream net_file;  net_file<<genome_file<<"."<<port<<".net";
-	myNet.loadFromFile(net_file.str().c_str());
 
 	for(int h = 0 ; h < num_hidden; h++) {
 		hidden_neurons[h] = myNet.addNeuron(HIDDEN, hidden_name);
@@ -38,7 +36,7 @@ int main(int argc, char *argv[]) {
 		input_neurons[i] = myNet.addNeuron(INPUT, input_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(-0.5,1.0);
+			float weight = randomFloat(-0.25,1.5);
 			myNet.addSynapse(input_neurons[i], hidden_neurons[h], weight);
 		}
 	}
@@ -47,7 +45,7 @@ int main(int argc, char *argv[]) {
 		output_neurons[o] = myNet.addNeuron(OUTPUT, output_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(-0.5,1.5);
+			float weight = randomFloat(-0.25,2.0);
 			myNet.addSynapse(hidden_neurons[h], output_neurons[o], weight);
 		}
 	}
@@ -55,7 +53,7 @@ int main(int argc, char *argv[]) {
 		gene_neurons[o] = myNet.addNeuron(OUTPUT, gene_name);
 
 		for(int h = 0 ; h < num_hidden; h++) {
-			float weight = randomFloat(-0.5,1.2);
+			float weight = randomFloat(-0.25,1.8);
 			myNet.addSynapse(hidden_neurons[h], gene_neurons[o], weight);
 		}
 	}

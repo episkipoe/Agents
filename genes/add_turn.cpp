@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 
 	char input_name[] = "eye";
 	char hidden_name[] = "visual";
-	char output_name[] = "legs";
+	char output_name[] = "turn";
 	char gene_name[] = "//turn";
 	stringstream net_file;  net_file<<genome_file<<"."<<port<<".net";
 	myNet.loadFromFile(net_file.str().c_str());

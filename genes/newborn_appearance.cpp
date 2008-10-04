@@ -9,9 +9,10 @@ int main(int argc, char *argv[]) {
 	int myPort = atoi(argv[0]);
 	srandom(500);
 	int width=16, height=16;
-	int size=width*height;
+	int size=width*height*4;
 	int header_size=sizeof(int)+sizeof(int);  int buffer_size=header_size+size;
 	char * data;  data = new char[buffer_size]; char * loading_zone=data;
+	memset(data, 0, buffer_size);
 	memcpy(loading_zone, &width, sizeof(int));
 	loading_zone+=sizeof(int);
 	memcpy(loading_zone, &height, sizeof(int));
@@ -19,7 +20,8 @@ int main(int argc, char *argv[]) {
 	for(int i=0;i<size;i++) {
 		loading_zone[i]=numberBetween(0,255);
 	}
-	memcpy(loading_zone, data, size);
+	//memcpy(loading_zone, data, size);
+
 	send_message(myPort, 49152, VISION, buffer_size, data);
 	delete [] data;
 	return 0;
