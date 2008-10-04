@@ -66,7 +66,7 @@ namespace input {
 			case 'p': is_paused = !is_paused;
 				break;
 			case 'q':
-				kill_all_agents();
+				//kill_all_agents();
 				exit(0);
 		}
 	}

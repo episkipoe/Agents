@@ -6,6 +6,7 @@
 
 extern float text_size;
 vector<Announcement> msgs;
+extern bool is_paused;
 
 void add_announcement(std::string msg, Point *location, int ttl) {
 	if(!location || ttl<=0) return ;
@@ -26,7 +27,7 @@ void draw_announcements(void) {
 			if(iter==msgs.end()) break;
 			continue;
 		}
-		(*iter).ttl--;
+		if(!is_paused) (*iter).ttl--;
 
 		drawText((*iter).location.x, (*iter).location.y, (*iter).msg.c_str(), text_size);
 	}

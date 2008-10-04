@@ -52,7 +52,7 @@ int main (int argc, char * argv[]) {
 	sigaction(SIGTERM, &new_action, NULL);
 
 	for(int gidx = 1 ; gidx<argc ; gidx++) {
-		for(int i=0;i<4;i++) {
+		for(int i=0;i<5;i++) {
 			add_agent(argv[gidx]);
 		}
 	}

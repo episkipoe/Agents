@@ -45,6 +45,8 @@ public:
 	/*time*/
 	void end_turn(void) ;
 
+	float sort_value;
+
 private:
 	Genome * genome;
 	int pid, port;

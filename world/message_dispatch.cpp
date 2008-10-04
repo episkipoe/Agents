@@ -81,6 +81,7 @@ int check_for_message(void) {
 			}
 			break;
 		default:
+			printf("unhandled message %i\n", type);
 			break;
 	}
 

@@ -20,6 +20,8 @@ Agent::Agent(Genome * g, int mypid, int myport):genome(g), pid(mypid), port(mypo
 
 Agent::~Agent() {
 	printf("destruct\n");
+	GLuint id = get_port();
+	glDeleteTextures(1, &id);
 	delete genome;
 }
 
@@ -29,15 +31,13 @@ void Agent::set_appearance(char * data, int data_size) {
 	data+=sizeof(int);  data_size-=sizeof(int);
 	memcpy(&height, data, sizeof(int));
 	data+=sizeof(int);  data_size-=sizeof(int);
-	int size = width*height;
 	//printf("recover image %i by %i  (%i vs %i)\n", width, height, size, data_size);
-	if(data_size<size) return ;
 
 	delete [] avatar.data;
 	avatar.width = width;
 	avatar.height = height;
-	avatar.data = new char[size];
-	memcpy((void*)avatar.data, data, size); 
+	avatar.data = new char[data_size];
+	memcpy((void*)avatar.data, data, data_size); 
 }
 
 void Agent::get_appearance(int &width, int &height, char **data) {
@@ -62,6 +62,7 @@ void Agent::draw(void) {
 			drawText(curPos->x-x_delta, curPos->y+y_delta, lbl.str().c_str(), text_size);
 			return ;
 		}
+
 		glBindTexture(GL_TEXTURE_2D, id);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -69,13 +70,14 @@ void Agent::draw(void) {
 		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_BYTE, data);
+		glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	} 
 	float left   = -x_delta;
 	float right  =  x_delta;
 	float bottom = -y_delta;
 	float top    =  y_delta;
 
+	glDepthFunc(GL_LESS);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, id);
 	glPushMatrix();
@@ -95,6 +97,7 @@ void Agent::draw(void) {
 	glPopMatrix();
 
 	glDisable(GL_TEXTURE_2D);
+	glDepthFunc(GL_ALWAYS);
 	glColor3f(1.0,1.0,1.0);
 	stringstream lbl;  lbl<<id;
 	drawText(curPos->x-x_delta, curPos->y+y_delta, lbl.str().c_str(), text_size);
@@ -126,7 +129,7 @@ int Agent::have_child(char * filename) {
 	if(child) {
 		child->attr.energy=attr.energy;
 		child->attr.location = attr.location;
-		child->attr.location.y-=1.0;
+		child->attr.location.y-=avatar.height*0.2;
 	}
 	return 1;
 }

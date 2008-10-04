@@ -47,15 +47,23 @@ void kill_all_agents(void) {
 	agents.clear();
 }
 
-int get_agents_by_distance(Point * eye, float distance, vector<Agent*> &out_vec) {
+int get_agents_by_distance(Point * eye, float maxDistance, vector<Agent*> &out_vec) {
 	int agents_added=0;
 	for (unsigned int i=0;i<agents.size();i++) {
-		if(eye->distance(agents[i]->attr.location)<distance) {
+		float curDistance = eye->distance(agents[i]->attr.location);
+		if(curDistance<maxDistance) {
+			//printf("%i is in range dx %g\n", agents[i]->get_port(), curDistance);
 			agents_added++;
 			out_vec.push_back(agents[i]);
+			agents[i]->sort_value = curDistance;
 		}
 	}
 	return agents_added;
+}
+
+bool agent_less (Agent *agentA, Agent *agentB) {
+	//printf("cmp %i to %i %g to %g\n", agentA->get_port(), agentB->get_port(), agentA->sort_value , agentB->sort_value);
+	return (agentA->sort_value < agentB->sort_value);
 }
 
 char * get_vision_vector(Agent * curAgent, int * length) {
@@ -63,7 +71,7 @@ char * get_vision_vector(Agent * curAgent, int * length) {
 
 	float slopeToView=tan(curAgent->attr.heading); /*rise over run on unit circle*/
 
-	/*
+	/*	
 	printf("get vision of %i\n\t", curAgent->get_port());
 	eye->show();
 	printf("looking at %g slope %g\n", curAgent->attr.heading, slopeToView);
@@ -81,6 +89,7 @@ char * get_vision_vector(Agent * curAgent, int * length) {
 	for(iter = nearby.begin() ; iter!=nearby.end() ; iter++) {
 		Point * target = (*iter)->get_location();
 		if((*iter)->get_port() == curAgent->get_port()) {
+			//printf("erase %i\n", (*iter)->get_port());
 			iter = nearby.erase(iter);
 			if(iter==nearby.end()) break;
 			continue;
@@ -102,24 +111,30 @@ char * get_vision_vector(Agent * curAgent, int * length) {
 		//printf("angle is %g\n", angleToTarget);
 		float angle = curAgent->attr.view_angle;
 		if(fabs(angleToTarget) > (angle*0.5)) {
+			//printf("erase %i\n", (*iter)->get_port());
 			iter = nearby.erase(iter);
 			if(iter==nearby.end()) break;
 			continue;
 		} 
+		//printf("distance from %i to %i is %g\n", curAgent->get_port(), (*iter)->get_port(), (*iter)->sort_value);
 	}
 	//printf("%i agents visible\n", nearby.size());
-
-	int size = nearby.size()*sizeof(int);
+	int size_per_agent = sizeof(int)+sizeof(float);
+	int size = nearby.size()*size_per_agent;
 	*length=size;
 	if(size<=0) { 
 		return (char*)0;
 	}
+	sort(nearby.begin(), nearby.end(), agent_less);
 	char * data = new char[size];
 	char * loadingZone = data;
 	for(unsigned int i=0;i<nearby.size();i++) {
 		int port = nearby[i]->get_port();
+		//printf("\ttransmit %i %g\n", port, nearby[i]->sort_value);
 		memcpy(loadingZone, &port, sizeof(int));
 		loadingZone+=sizeof(int);
+		memcpy(loadingZone, &nearby[i]->sort_value, sizeof(float));
+		loadingZone+=sizeof(float);
 	}
 	return data;
 }
