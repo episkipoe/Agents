@@ -6,6 +6,7 @@
 #include "manage_agents.h"
 #include "display.h"
 #include "input.h"
+#include "senses.h"
 #include "message_dispatch.h"
 
 int myPort=49152;
@@ -52,7 +53,7 @@ int main (int argc, char * argv[]) {
 	sigaction(SIGTERM, &new_action, NULL);
 
 	for(int gidx = 1 ; gidx<argc ; gidx++) {
-		for(int i=0;i<5;i++) {
+		for(int i=0;i<4;i++) {
 			add_agent(argv[gidx]);
 		}
 	}

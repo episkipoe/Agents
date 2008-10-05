@@ -4,6 +4,7 @@
 #include "manage_agents.h"
 #include "display.h"
 #include "announcements.h"
+#include "food.h"
 
 extern int myPort;
 extern int sock; 
@@ -40,21 +41,24 @@ int check_for_message(void) {
 		case NEW_ORGANISM:
 			{
 				char * filename = getStringFromData(data, message_length);
-				if(sender) sender->have_child(filename);
+				int child_id;
+				if(sender) {
+					child_id = sender->have_child(filename);
+					if(child_id > 0) send_message(myPort, sender_port, type, sizeof(int), (char*)&child_id);
+				}
 				delete [] filename;
-				send_message(myPort, sender_port, type, 0, (char*)0);
 			}
 			break;
 		case KILL:
 			{
-				int victim;
-				memcpy(&victim, data, sizeof(int));
-				if(victim==myPort) {
+				int target;
+				memcpy(&target, data, sizeof(int));
+				if(target==myPort) {
 					kill_all_agents();
 				} else {
-					Agent * target = get_agent_by_port(victim);
-					if(sender && target) {
-						sender->attack(target);
+					Agent * victim = get_agent_by_port(target);
+					if(sender && victim) {
+						sender->attack(victim);
 					}	
 				}
 			}
@@ -78,6 +82,15 @@ int check_for_message(void) {
 				memcpy(&angle, data, sizeof(char));
 				//printf("turn angle %i\n", angle);
 				sender->turn(angle);
+			}
+			break;
+		case EAT:
+			{
+				int target;
+				memcpy(&target, data, sizeof(int));
+				if(sender) {
+					attempt_to_eat(sender, target);
+				}
 			}
 			break;
 		default:

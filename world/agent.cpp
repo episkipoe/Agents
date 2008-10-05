@@ -14,7 +14,7 @@ Agent::Agent(Genome * g, int mypid, int myport):genome(g), pid(mypid), port(mypo
 	attr.location.y=numberBetween(-10,10);
 	attr.heading=numberBetween(-PI*0.5,PI*0.5);
 	attr.view_angle=PI/4.0;
-	attr.view_distance=80;
+	attr.view_distance=40;
 	memset(&avatar, 0, sizeof(Appearance));
 }
 
@@ -84,6 +84,10 @@ void Agent::draw(void) {
 	float angle = attr.heading*180.0/PI;
 	glTranslatef(curPos->x, curPos->y, curPos->z);
 	glRotatef(angle, 0, 0, 1);
+	glBegin (GL_LINES);
+		glVertex3f(0, top, 0.0);
+		glVertex3f(0, top+y_delta*0.5, 0.0);
+	glEnd();
 	glBegin (GL_QUADS);
 		glTexCoord2f (0.0f,0.0f); /* lower left corner */
 		glVertex3f (left, bottom, 0.0f);
@@ -94,6 +98,21 @@ void Agent::draw(void) {
 		glTexCoord2f (0.0f, 1.0f); /* upper left corner */
 		glVertex3f (left, top, 0.0f);
 	glEnd ();	
+
+	angle = attr.view_angle*180.0/PI;
+	glRotatef(angle, 0, 0, 1);
+	glBegin (GL_LINES);
+		glVertex3f(0, top, 0.0);
+		glVertex3f(0, top+attr.view_distance*0.5, 0.0);
+	glEnd();
+	glRotatef(-(angle*2.0), 0, 0, 1);
+	glBegin (GL_LINES);
+		glVertex3f(0, top, 0.0);
+		glVertex3f(0, top+attr.view_distance*0.5, 0.0);
+	glEnd();
+
+
+
 	glPopMatrix();
 
 	glDisable(GL_TEXTURE_2D);
@@ -126,12 +145,11 @@ int Agent::have_child(char * filename) {
 	attr.energy*=0.5;
 	printf("child %s gets %i\n", filename, attr.energy);
 	Agent * child = add_agent(filename, this);
-	if(child) {
-		child->attr.energy=attr.energy;
-		child->attr.location = attr.location;
-		child->attr.location.y-=avatar.height*0.2;
-	}
-	return 1;
+	if(!child) return 0;
+	child->attr.energy=attr.energy;
+	child->attr.location = attr.location;
+	child->attr.location.y-=avatar.height*0.2;
+	return child->get_port();
 }
 
 void Agent::attack (Agent * target) {

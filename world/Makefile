@@ -4,6 +4,8 @@ SRC=	main.cpp \
 	input.cpp \
 	announcements.cpp \
 	manage_agents.cpp \
+	senses.cpp \
+	food.cpp \
 	message_dispatch.cpp
 
 LIBS=	$(DEFAULT_LIBRARIES) -lgraphics -lglut 
