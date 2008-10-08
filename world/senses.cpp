@@ -6,16 +6,27 @@ extern vector <Agent *> agents;
 extern int myPort;
 
 char * get_vision_vector(Agent * curAgent, int * length) {
-	Point * eye = curAgent->get_location();
-
-	float slopeToView=tan(curAgent->attr.heading); /*rise over run on unit circle*/
-
 	int curPort = curAgent->get_port();
-	/*
-	printf("get vision of %i\n\t", curPort);
-	eye->show();
-	printf("looking at %g slope %g\n", curAgent->attr.heading, slopeToView);
-	*/
+	Point * eye = curAgent->get_location();
+	float heading = curAgent->attr.heading;
+	float slopeToView=tan(heading);
+	Point lookingAt;
+	if(fabs(heading)>PI*0.5) {
+		lookingAt.x = eye->x-1.0;
+		lookingAt.y = eye->y-slopeToView;
+	} else {
+		lookingAt.x = eye->x+1.0;
+		lookingAt.y = eye->y+slopeToView;
+	}
+	lookingAt.z = eye->z;
+
+	/*if(curPort == 49153) {
+		printf("get vision of %i\n\t", curPort);
+		eye->show();
+		float heading_deg = heading*180.0/PI;
+		printf("looking at %g (%g) \n\t", heading, heading_deg);
+		lookingAt.show();
+	}*/
 
 	vector<Agent*> nearby;
 	get_agents_by_distance(eye, curAgent->attr.view_distance, nearby);
@@ -24,33 +35,26 @@ char * get_vision_vector(Agent * curAgent, int * length) {
 		*length=0;
 		return (char*)0;
 	}
-	int idx=0, max=nearby.size();
+	//int idx=0, max=nearby.size();
 	vector <Agent *>::iterator iter;
 	for(iter = nearby.begin() ; iter!=nearby.end() ; ) {
 		Point * target = (*iter)->get_location();
 		
-		if((*iter)->get_port() == curAgent->get_port()) {
+		if((*iter)->get_port() == curPort) {
 			//printf("erase by identity %i\n", (*iter)->get_port());
 			iter = nearby.erase(iter);
 			if(iter==nearby.end()) break;
 			continue;
 		}
 
-		double slopeToTarget = (target->y - eye->y) / (target->x - eye->x);
-		double tanAngle = ((slopeToView-slopeToTarget)/(1 + slopeToView*slopeToTarget));
-		float angleToTarget;
-		if(!isfinite(tanAngle)) {
-			angleToTarget=PI*0.5;			
-		} else {
-			angleToTarget=atan(tanAngle);
-		}
+		float angleToTarget = eye->angle(&lookingAt, target);
 		float angle = curAgent->attr.view_angle;
-		if(curPort == 49153) {
-			printf("%i of %i compare to %i\n", ++idx, max, (*iter)->get_port());
+		/*if(curPort == 49153) {
+			printf("%i of %i compare to %i\n\t", ++idx, max, (*iter)->get_port());
 			target->show();
-			printf("slope is %g\ntanAngle is %g\n", slopeToTarget, tanAngle);
-			printf("%s angle is %g vs %g\n", (fabs(angleToTarget) > angle)? "N" : "Y", angleToTarget, angle);
-		}
+			float angle_deg = angleToTarget*180.0/PI;
+			printf("\t%s angle is %g (%g) vs %g\n", (fabs(angleToTarget) > angle)? "N" : "Y", angleToTarget, angle_deg, angle);
+		}*/
 		if(fabs(angleToTarget) > angle) {
 			iter = nearby.erase(iter);
 			if(iter==nearby.end()) break;
