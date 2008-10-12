@@ -10,11 +10,11 @@ Agent::Agent(Genome * g, int mypid, int myport):genome(g), pid(mypid), port(mypo
 	attr.energy=10;
 	attr.status = OK;
 	attr.max_speed=3.0;
-	attr.location.x=numberBetween(-10,10);
-	attr.location.y=numberBetween(-10,10);
-	attr.heading=numberBetween(-PI*0.5,PI*0.5);
+	attr.location.x=randomFloat(-15,15);
+	attr.location.y=randomFloat(-15,15);
+	attr.heading=randomFloat(-PI*0.5,PI*0.5);
 	attr.view_angle=PI/4.0;
-	attr.view_distance=40;
+	attr.view_distance=30;
 	memset(&avatar, 0, sizeof(Appearance));
 }
 
@@ -82,12 +82,10 @@ void Agent::draw(void) {
 	glBindTexture(GL_TEXTURE_2D, id);
 	glPushMatrix();
 	float angle = attr.heading*180.0/PI;
+
 	glTranslatef(curPos->x, curPos->y, curPos->z);
 	glRotatef(angle, 0, 0, 1);
-	glBegin (GL_LINES);
-		glVertex3f(0, top, 0.0);
-		glVertex3f(0, top+y_delta*0.5, 0.0);
-	glEnd();
+
 	glBegin (GL_QUADS);
 		glTexCoord2f (0.0f,0.0f); /* lower left corner */
 		glVertex3f (left, bottom, 0.0f);
@@ -99,19 +97,22 @@ void Agent::draw(void) {
 		glVertex3f (left, top, 0.0f);
 	glEnd ();	
 
+	glBegin (GL_LINES);
+		glVertex3f(right, 0, 0.0);
+		glVertex3f(right+x_delta*0.5, 0.0, 0.0);
+	glEnd();
+
 	angle = attr.view_angle*180.0/PI;
 	glRotatef(angle, 0, 0, 1);
 	glBegin (GL_LINES);
-		glVertex3f(0, top, 0.0);
-		glVertex3f(0, top+attr.view_distance*0.5, 0.0);
+		glVertex3f(right, 0.0, 0.0);
+		glVertex3f(right+attr.view_distance, 0.0, 0.0);
 	glEnd();
 	glRotatef(-(angle*2.0), 0, 0, 1);
 	glBegin (GL_LINES);
-		glVertex3f(0, top, 0.0);
-		glVertex3f(0, top+attr.view_distance*0.5, 0.0);
+		glVertex3f(right, 0.0, 0.0);
+		glVertex3f(right+attr.view_distance, 0.0, 0.0);
 	glEnd();
-
-
 
 	glPopMatrix();
 
@@ -176,6 +177,11 @@ void Agent::turn (int angle) {
 	}
 	float delta = 2*PI;	
 	attr.heading += -PI + (angle/double(SCHAR_MAX))*delta;
+	if(attr.heading<-2*PI) {
+		attr.heading+=2*PI;
+	} else if(attr.heading>2*PI) {
+		attr.heading-=2*PI;
+	}
 }
 
 void Agent::end_turn(void) {

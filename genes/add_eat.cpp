@@ -21,6 +21,13 @@ int main(int argc, char *argv[]) {
 	stringstream net_file;  net_file<<genome_file<<"."<<port<<".net";
 	myNet.loadFromFile(net_file.str().c_str());
 
+	/*
+	for(int i = 0 ; i < 4; i++) {
+		myNet.addNeuron(INPUT, "hunger");
+	}
+	myNet.connectSubnets("hunger", "eat", -0.1, 1.5);
+	*/
+
 	for(int o = 0 ; o < num_attack_outputs; o++) {
 		myNet.addNeuron(OUTPUT, "attack");
 	}

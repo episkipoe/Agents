@@ -39,24 +39,22 @@ int check_for_message(int sock) {
 		}
 	} else if(type == VISION) {
 		if(message_length<=0) {
-			if(myPort==49153) {
-				printf("nobody\n");
-			}
 			organism_of_focus=worldPort;
-			char data[2]={60,0};
-			send_message(myPort, worldPort, TURN, 1, data);
-			usleep(200);
+			if(success(30)) {
+				char data[2]={60,0};
+				send_message(myPort, worldPort, TURN, 1, data);
+				usleep(400);
+			}
 		} else {
 			memcpy(&organism_of_focus, data, sizeof(int));
 			myNet.feedInput(data, message_length, "eye");
 			char * dx_str = &data[sizeof(int)];
 			float dx;
 			memcpy(&dx, dx_str, sizeof(float));
-			if(myPort==49153) {
+			/*if(myPort==49153) {
 				printf("%i at %g\n", organism_of_focus, dx);
-			}
+			}*/
 			if(dx<2.0) {
-				printf("I will try to eat %i\n", organism_of_focus);
 				if(find(children.begin(), children.end(), organism_of_focus) == children.end()) {
 					stringstream destination_str;  destination_str<<organism_of_focus;
 					myGenome.transcribeGene("//eat", 2, portstr.str().c_str(), destination_str.str().c_str());
@@ -70,11 +68,11 @@ int check_for_message(int sock) {
 	} else if(type == EAT) {
 		int victim;
 		memcpy(&victim, data, sizeof(int));
-		/*if(victim==myPort) {
-			printf("I'm being eaten\n");
+		if(victim==myPort) {
+			/*printf("I'm being eaten\n");*/
 		} else {
-			printf("I'm eating\n");
-		}*/
+			myNet.reward("eat", 0.5);
+		}
 	} else if(type == NEW_ORGANISM) {
 		int child_id;
 		memcpy(&child_id, data, sizeof(int));

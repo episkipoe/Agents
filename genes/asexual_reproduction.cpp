@@ -41,7 +41,14 @@ void mutate_block(char block[][LINE_MAX], int n_lines) {
 		}
 	}
 }
-enum Mutation {NONE, AMPLIFICATION, DUPLICATION, DELETION, POINT_MUTATION, TRANSLOCATION, INVERSION, MAX_MUTATION};
+
+int delete_random_line(block, n_lines) {
+	int line = numberBetween(0,n_lines);
+	block[line][0]='/';
+	block[line][1]='/';
+}
+
+enum Mutation {NONE, AMPLIFICATION, DUPLICATION, LINE_DELETION, BLOCK_DELETION, POINT_MUTATION, TRANSLOCATION, INVERSION, MAX_MUTATION};
 Mutation get_mutation(double mutation_rate) {
 	if(randomFloat(0.0,1.0)<mutation_rate) {
 		return Mutation(numberBetween(1,MAX_MUTATION-1));
@@ -60,11 +67,14 @@ int asexual_reproduction(char * mother_file, char * child_file, double mutation_
 		}
 		Mutation mutation = get_mutation(mutation_rate);
 		int n_lines = read_block(fmom, block);
-		if(mutation==DELETION) continue;
+		if(mutation==BLOCK_DELETION) continue;
 		if(mutation==INVERSION) {
 			write_block_backwards(fchild, block, n_lines);
 			continue;
 		} 
+		if(mutation==LINE_DELETION) {
+			delete_random_line(block, n_lines);
+		}
 		if(mutation==POINT_MUTATION) {
 			mutate_block(block, n_lines);
 		}
@@ -78,7 +88,7 @@ int asexual_reproduction(char * mother_file, char * child_file, double mutation_
 int main(int argc, char * argv[]) {
 	if(argc<3) return 1;
 	int srcPort = atoi(argv[0]);
-	asexual_reproduction(argv[1], argv[2], 1e-4);	
+	asexual_reproduction(argv[1], argv[2], 1e-4);
 	int destPort = 49152;
 	if(argc>3) destPort = atoi(argv[3]);
 	send_message(srcPort, destPort, NEW_ORGANISM, strlen(argv[2]), argv[2]);
