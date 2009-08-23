@@ -1,6 +1,7 @@
 //add_turn
 #include <string>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sstream>
 #include <common/shmem.h>
 #include <common/randomhelp.h>

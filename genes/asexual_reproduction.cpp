@@ -2,13 +2,18 @@
 #include <string>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <common/randomhelp.h>
 #include <messages/message.h>
 #define MAX_LINES_PER_BLOCK 2048
+double mutation_rate = 0.001;
 int read_block(FILE * f, char block[][LINE_MAX]) {
 	int line_number=0;
 	while(fgets(block[line_number], LINE_MAX, f) != NULL) {
 		if(strlen(block[line_number])<=1) break;
+		if(!strncmp(block[line_number], "//mutation_rate", 15)) {
+			mutation_rate = atof(&block[line_number][16]);
+		}
 		line_number++;
 		if(line_number>=MAX_LINES_PER_BLOCK) break;
 	}
@@ -42,20 +47,24 @@ void mutate_block(char block[][LINE_MAX], int n_lines) {
 	}
 }
 
-int delete_random_line(block, n_lines) {
+void delete_random_line(char block[][LINE_MAX], int n_lines) {
 	int line = numberBetween(0,n_lines);
 	block[line][0]='/';
 	block[line][1]='/';
 }
-
-enum Mutation {NONE, AMPLIFICATION, DUPLICATION, LINE_DELETION, BLOCK_DELETION, POINT_MUTATION, TRANSLOCATION, INVERSION, MAX_MUTATION};
-Mutation get_mutation(double mutation_rate) {
+void copy_random_line(char block[][LINE_MAX], int n_lines) {
+	int line = numberBetween(0,n_lines);
+	int len = strlen(block[line]);
+	memcpy(&block[line][len], block[line], len);
+}
+enum Mutation {NONE, AMPLIFICATION, LINE_DUPLICATION, BLOCK_DUPLICATION, LINE_DELETION, BLOCK_DELETION, POINT_MUTATION, TRANSLOCATION, INVERSION, MAX_MUTATION};
+Mutation get_mutation(void) {
 	if(randomFloat(0.0,1.0)<mutation_rate) {
 		return Mutation(numberBetween(1,MAX_MUTATION-1));
 	}
 	return NONE;
 }
-int asexual_reproduction(char * mother_file, char * child_file, double mutation_rate ) {
+int asexual_reproduction(char * mother_file, char * child_file ) {
 	FILE * fmom = fopen(mother_file, "r");
 	FILE * fchild = fopen(child_file, "w");
 	char block[MAX_LINES_PER_BLOCK][LINE_MAX];
@@ -65,7 +74,7 @@ int asexual_reproduction(char * mother_file, char * child_file, double mutation_
 			fclose(fchild);
 			return 1;
 		}
-		Mutation mutation = get_mutation(mutation_rate);
+		Mutation mutation = get_mutation();
 		int n_lines = read_block(fmom, block);
 		if(mutation==BLOCK_DELETION) continue;
 		if(mutation==INVERSION) {
@@ -75,11 +84,14 @@ int asexual_reproduction(char * mother_file, char * child_file, double mutation_
 		if(mutation==LINE_DELETION) {
 			delete_random_line(block, n_lines);
 		}
+		if(mutation==LINE_DUPLICATION) {
+			copy_random_line(block, n_lines);
+		}
 		if(mutation==POINT_MUTATION) {
 			mutate_block(block, n_lines);
 		}
 		write_block(fchild, block, n_lines);
-		if(mutation==DUPLICATION) {
+		if(mutation==BLOCK_DUPLICATION) {
 			write_block(fchild, block, n_lines);
 		}
 	}
@@ -88,7 +100,7 @@ int asexual_reproduction(char * mother_file, char * child_file, double mutation_
 int main(int argc, char * argv[]) {
 	if(argc<3) return 1;
 	int srcPort = atoi(argv[0]);
-	asexual_reproduction(argv[1], argv[2], 1e-4);
+	asexual_reproduction(argv[1], argv[2]);
 	int destPort = 49152;
 	if(argc>3) destPort = atoi(argv[3]);
 	send_message(srcPort, destPort, NEW_ORGANISM, strlen(argv[2]), argv[2]);

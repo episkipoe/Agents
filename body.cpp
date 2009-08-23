@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 #include <unistd.h>
+#include <string.h>
 #include <genome/genome.h>
 #include <nnets/nnets.h>
 #include <messages/message.h>
@@ -55,7 +57,7 @@ int check_for_message(int sock) {
 				printf("%i at %g\n", organism_of_focus, dx);
 			}*/
 			if(dx<2.0) {
-				if(find(children.begin(), children.end(), organism_of_focus) == children.end()) {
+				if(std::find(children.begin(), children.end(), organism_of_focus) == children.end()) {
 					stringstream destination_str;  destination_str<<organism_of_focus;
 					myGenome.transcribeGene("//eat", 2, portstr.str().c_str(), destination_str.str().c_str());
 				}
@@ -80,6 +82,11 @@ int check_for_message(int sock) {
 		n_children++;
 	} else if(type == DISPLAY) {
 		myNet.printStats(1);
+	} else if(type == SAVE) {
+		char * filename = getStringFromData(data, message_length);
+		stringstream cmd;
+		cmd<<"cp "<<genome_file<<" "<<filename;
+		system(cmd.str().c_str());
 	}
 	return 1;
 }
@@ -138,7 +145,7 @@ int main (int argc, char * argv[]) {
 			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "eat", 0.2, "//eat", 1, portstr.str().c_str()) ;
 
 			stringstream child_file;  child_file<<genome_file<<n_children;
-			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "reproduction", 0.5, "//asexual_reproduction", 4, portstr.str().c_str(), genome_file, child_file.str().c_str(), worldportstr.str().c_str()) ;
+			myGenome.transcribeGeneIfSubnetFires(output_length, output_data, "reproduction", 0.33, "//asexual_reproduction", 4, portstr.str().c_str(), genome_file, child_file.str().c_str(), worldportstr.str().c_str()) ;
 	
 			usleep(2000);
 			sleep(2);

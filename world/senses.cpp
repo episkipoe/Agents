@@ -1,4 +1,5 @@
 #include <vector>
+#include <algorithm>
 #include <messages/message.h>
 #include "manage_agents.h"
 

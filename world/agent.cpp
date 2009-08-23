@@ -3,7 +3,9 @@
 #include <common/randomhelp.h>
 #include <graphics/graphics.h>
 #include "manage_agents.h"
-
+#ifndef SCHAR_MAX
+#define SCHAR_MAX 255
+#endif
 extern float text_size;
 
 Agent::Agent(Genome * g, int mypid, int myport):genome(g), pid(mypid), port(myport) {
@@ -101,7 +103,7 @@ void Agent::draw(void) {
 		glVertex3f(right, 0, 0.0);
 		glVertex3f(right+x_delta*0.5, 0.0, 0.0);
 	glEnd();
-
+#if 0
 	angle = attr.view_angle*180.0/PI;
 	glRotatef(angle, 0, 0, 1);
 	glBegin (GL_LINES);
@@ -113,7 +115,7 @@ void Agent::draw(void) {
 		glVertex3f(right, 0.0, 0.0);
 		glVertex3f(right+attr.view_distance, 0.0, 0.0);
 	glEnd();
-
+#endif
 	glPopMatrix();
 
 	glDisable(GL_TEXTURE_2D);

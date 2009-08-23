@@ -1,6 +1,7 @@
 //add_auditory
 #include <string>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sstream>
 #include <common/randomhelp.h>
 #include <nnets/nnets.h>

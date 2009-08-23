@@ -1,4 +1,5 @@
 //encourage_auditory
+#include <stdlib.h>
 #include <common/randomhelp.h>
 #include <nnets/nnets.h>
 #include <sstream>

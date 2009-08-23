@@ -1,6 +1,7 @@
 //add_movement
 #include <string>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sstream>
 #include <common/shmem.h>
 #include <common/randomhelp.h>
@@ -17,7 +18,6 @@ int main(int argc, char *argv[]) {
 	Neuron ** output_neurons = new Neuron*[num_outputs];
 	int num_geneneurons = 2;
 	Neuron ** gene_neurons = new Neuron*[num_geneneurons];
-
 
 	char output_name[] = "move";
 	char gene_name[] = "//move";

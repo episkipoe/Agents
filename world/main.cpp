@@ -1,6 +1,7 @@
 #include <GL/glut.h>
 #include <vector>
 #include <signal.h>
+#include <stdlib.h>
 #include <messages/message.h>
 #include "agent.h"
 #include "manage_agents.h"
