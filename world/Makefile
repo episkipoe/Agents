@@ -8,7 +8,7 @@ SRC=	main.cpp \
 	food.cpp \
 	message_dispatch.cpp
 
-LIBS=	$(DEFAULT_LIBRARIES) -lgraphics -lglut 
+LIBS=	$(DEFAULT_LIBRARIES) 
 
 include ~/.makedefs
 
