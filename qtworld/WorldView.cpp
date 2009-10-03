@@ -110,11 +110,11 @@ void WorldView::resizeGL(int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-void WorldView::mousePressEvent(QMouseEvent *event) {
+/*void WorldView::mousePressEvent(QMouseEvent *event) {
 }
 
 void WorldView::mouseMoveEvent(QMouseEvent *event) {
-}
+}*/
 
 void WorldView::keyPressEvent(QKeyEvent * event) {
 	switch(event->key()) {
